@@ -2901,6 +2901,11 @@ public class CallsManager extends Call.ListenerBase
                     // Make sure we set the PhoneAccount before making room
                     callToPlace.setTargetPhoneAccount(callHandle);
 
+                    // Skip making room and directly place call for MMI codes
+                    if (mMmiUtils.isPotentialInCallMMICode(handle) && !isSelfManaged) {
+                        return CompletableFuture.completedFuture(new Pair<>(callHandle, true));
+                    }
+
                     return mCallSequencingAdapter.makeRoomForOutgoingCall(
                                     callToPlace.isEmergencyCall(), callToPlace)
                             .exceptionally(throwable -> {
