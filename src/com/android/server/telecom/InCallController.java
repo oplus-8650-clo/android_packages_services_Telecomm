@@ -2716,7 +2716,8 @@ public class InCallController extends CallsManagerListenerBase implements
             // Only send the RTT call if it's a UI in-call service
             boolean includeRttCall = false;
             if (mInCallServiceConnections.containsKey(userFromCall)) {
-                includeRttCall = info.equals(mInCallServiceConnections.get(userFromCall).getInfo());
+                includeRttCall = info.equals(mInCallServiceConnections.get(userFromCall).getInfo())
+                                 && call.areRttStreamsInitialized();
             }
 
             // Track the call if we don't already know about it.
