@@ -893,8 +893,9 @@ public class CallSequencingController {
         }
 
         if (mCallsManager.hasMaximumOutgoingCalls(call)) {
-            Call outgoingCall = mCallsManager.getFirstCallWithState(OUTGOING_CALL_STATES);
-            if (outgoingCall.getState() == CallState.SELECT_PHONE_ACCOUNT) {
+            Call outgoingCall = mCallsManager.getFirstCallWithStateExcept(call,
+                    OUTGOING_CALL_STATES);
+            if (outgoingCall != null && outgoingCall.getState() == CallState.SELECT_PHONE_ACCOUNT) {
                 // Users may accidentally repeat a click on the call button quickly after attempting
                 // a call. This casuses Telecom to end the previous SELECT_PHONE_ACCOUNT call to
                 // make room for 2nd call. But InCallUI will be handling the phone account selection
@@ -920,7 +921,8 @@ public class CallSequencingController {
                         "Disconnecting call in SELECT_PHONE_ACCOUNT in favor of new "
                                 + "outgoing call.");
             }
-            showErrorDialogForMaxOutgoingCallOutgoingPresent(call);
+            mContext.getMainExecutor().execute(() ->
+                    showErrorDialogForMaxOutgoingCallOutgoingPresent(call));
             return CompletableFuture.completedFuture(false);
         }
 
