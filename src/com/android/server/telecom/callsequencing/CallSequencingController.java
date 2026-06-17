@@ -101,6 +101,7 @@ public class CallSequencingController {
             "Cannot hold active call";
     private static final String KEY_SHOW_VOWIFI_DROP_DIALOG_ON_DSDS_BOOL =
             "show_vowifi_drop_dialog_on_dsds_bool";
+    private static final long ERROR_DIALOG_DELAY_MS = 200L;
 
     public CallSequencingController(CallsManager callsManager, Context context,
             ClockProxy clockProxy, AnomalyReporterAdapter anomalyReporter,
@@ -921,8 +922,7 @@ public class CallSequencingController {
                         "Disconnecting call in SELECT_PHONE_ACCOUNT in favor of new "
                                 + "outgoing call.");
             }
-            mContext.getMainExecutor().execute(() ->
-                    showErrorDialogForMaxOutgoingCallOutgoingPresent(call));
+            showErrorDialogForMaxOutgoingCallOutgoingPresent(call);
             return CompletableFuture.completedFuture(false);
         }
 
@@ -1367,8 +1367,9 @@ public class CallSequencingController {
             call.setStartFailCause(cause);
         }
         CharSequence message = TelecomResourceId.getResources(mContext).getText(resourceId);
-        UserUtil.showErrorDialogForRestrictedOutgoingCall(mContext, mTelecomPackageName, message,
-                TAG, reason);
+        mHandler.postDelayed(() ->
+                UserUtil.showErrorDialogForRestrictedOutgoingCall(mContext,
+                        mTelecomPackageName, message, TAG, reason), ERROR_DIALOG_DELAY_MS);
     }
 
     public Handler getHandler() {

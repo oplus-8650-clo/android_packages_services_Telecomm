@@ -28,6 +28,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
@@ -144,6 +145,9 @@ public class CallSequencingTests extends TelecomTestCase {
     @Override
     @After
     public void tearDown() throws Exception {
+        if (mController != null && mController.getHandler() != null) {
+            mController.getHandler().removeCallbacksAndMessages(null);
+        }
         TelecomResourceId.setTelecomContext(null);
         super.tearDown();
     }
@@ -684,7 +688,8 @@ public class CallSequencingTests extends TelecomTestCase {
         verify(mNewCall).setStartFailCause(eq(CallFailureCause.MAX_OUTGOING_CALLS));
         // 3. Error dialog activity was started via context.
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
-        verify(mContext).startActivityAsUser(intentCaptor.capture(), any(UserHandle.class));
+        verify(mContext, timeout(SEQUENCING_TIMEOUT_MS)).startActivityAsUser(
+                intentCaptor.capture(), any(UserHandle.class));
         Intent intent = intentCaptor.getValue();
         assertNotNull(intent);
         assertEquals("Dummy Error Message", intent.getCharSequenceExtra(
@@ -741,7 +746,8 @@ public class CallSequencingTests extends TelecomTestCase {
         assertFalse(waitForFutureResult(future, true));
 
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
-        verify(mContext).startActivityAsUser(intentCaptor.capture(), eq(UserHandle.CURRENT));
+        verify(mContext, timeout(SEQUENCING_TIMEOUT_MS)).startActivityAsUser(
+                intentCaptor.capture(), eq(UserHandle.CURRENT));
         Intent intent = intentCaptor.getValue();
         assertEquals(UiConstants.COMPONENT_ERROR_DIALOG,
                 intent.getComponent().getClassName());
