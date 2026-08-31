@@ -28,8 +28,6 @@ import android.app.Person;
 import android.content.Context;
 import android.content.res.Resources;
 import android.media.AudioAttributes;
-import android.content.res.Resources;
-import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
